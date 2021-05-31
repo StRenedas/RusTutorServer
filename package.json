@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npx nodemon app.js"
+    "dev": "npm start"
   },
   "author": "",
   "license": "ISC",
