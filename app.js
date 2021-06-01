@@ -7,9 +7,7 @@ const bcrypt = require('bcryptjs');
 const db = require("./db");
 const config = require("./config");
 const app = express();
-app.use(cors({
-    origin: "https://rus-tutor-server.herokuapp.com/",
-}));
+app.use(cors());
 app.use(bodyParser());
 /* ------------------ ROOT ROUTE ---------------------- */
 app.get("/", (req, res) => {
