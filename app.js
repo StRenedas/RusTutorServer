@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
 });
 /* ------------------ RATINGS ROUTE ---------------------- */
 app.get("/ratings", (req, res) =>  {
-    let sql_query = 'SELECT * FROM users';
+    let sql_query = 'SELECT * FROM users WHERE is_admin = 0';
     db.query(sql_query, (err, result) => {
         let Users = []
         if(err) throw err;
@@ -153,6 +153,7 @@ app.post('/process',(req, res) => {
         if (err) {
             console.log(err);
         } else {
+            console.log(result[0].rating);
             res.send({ updatedRating: result[0].rating});
         }
     })
@@ -215,6 +216,7 @@ app.post("/rating", (req, res) => {
         if (err) {
             console.log(err);
         } else {
+            console.log(result[0].rating);
             res.send({ updatedRating: result[0].rating});
         }
     })
