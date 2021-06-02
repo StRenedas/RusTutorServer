@@ -177,7 +177,6 @@ app.post('/task', (req, res) => {
                     if (err) console.log(err);
                     else {
                         console.log('inserted');
-                        res.send('Question successfully inserted!')
                     }
                     if (req.body.options) {
                         for (let i = 0; i < req.body.options.length; i++) {
