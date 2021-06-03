@@ -62,22 +62,23 @@ app.post("/login", (req, res) => {
 /* ------------------ SIGNUP ROUTE ---------------------- */
 app.post("/register", (req, res) => {
     let username = req.body.username;
+    let name = req.body.name;
     const salt = bcrypt.genSaltSync(10);
     let password = bcrypt.hashSync(req.body.password, salt);
     let email = req.body.email;
-    let user = [username, password, email];
-    let sql_getallusers = "SELECT username from Users WHERE username = ?";
+    let user = [username, password, email, name];
+    let sql_getallusers = "SELECT username from users WHERE username = ?";
     db.query(sql_getallusers, username, (err, rows) => {
         if(rows.length>0) {
             console.log('username found');
             res.send('Please choose another username!')
         }
         else {
-            let sql_template = 'INSERT INTO users (username, password, email) VALUES (?,?,?)';
-            db.query(sql_template, user, (err, result) => {
+            let sql_template = 'INSERT INTO users (username, password, email, name_surname) VALUES (?,?,?,?)';
+            db.query(sql_template, user, (err) => {
             if(err) throw err;
             console.log('registered');
-            res.send('Registration successfull!');
+            res.send('Registration successful!');
             })
         }
     })
