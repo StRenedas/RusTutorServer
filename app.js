@@ -20,7 +20,7 @@ app.get("/ratings", (req, res) =>  {
         let Users = []
         if(err) throw err;
         for (let i = 0; i < result.length; i++) {
-            Users.push({id: result[i].user_id, username: result[i].username, rating: result[i].rating});
+            Users.push({id: result[i].user_id, username: result[i].name_surname, rating: result[i].rating});
         }
         console.log(Users);
         res.send(Users);
