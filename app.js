@@ -15,11 +15,10 @@ app.get("/", (req, res) => {
 });
 /* ------------------ RATINGS ROUTE ---------------------- */
 app.get("/ratings", (req, res) =>  {
-    let sql_query = 'SELECT * FROM users WHERE is_admin = 0';
+    let sql_query = 'SELECT * FROM users WHERE is_admin = 0 ORDER BY name_surname';
     db.query(sql_query, (err, result) => {
         let Users = []
         if(err) throw err;
-        
         for (let i = 0; i < result.length; i++) {
             Users.push({id: result[i].user_id, username: result[i].username, rating: result[i].rating});
         }
