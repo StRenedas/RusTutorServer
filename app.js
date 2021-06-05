@@ -9,6 +9,11 @@ const config = require("./config");
 const app = express();
 app.use(cors());
 app.use(bodyParser());
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 /* ------------------ ROOT ROUTE ---------------------- */
 app.get("/", (req, res) => {
     res.send("welcome on root");
@@ -32,7 +37,7 @@ app.post("/login", (req, res) => {
     let gotPassword = req.body.logpassword;
     let sql_query = 'SELECT `user_id`, `username`, `rating`, `is_admin` FROM `users` WHERE username = ?';
     let checkPasswordQuery = 'SELECT password FROM users WHERE username = ?'
-    db.query(sql_query, gotUsername,(err, rows, result) => {
+    db.query(sql_query, gotUsername,(err, rows) => {
         if(rows.length>0) {
             let gotUserid = rows[0].user_id;
             let isAdmin = rows[0].is_admin;
@@ -166,21 +171,21 @@ app.post('/task', (req, res) => {
     const type = req.body.type;
     const points = req.body.points;
     let addTaskQuery = "INSERT INTO question (type, level, value, points) VALUES (?,?,?,?)";
-    db.query(addTaskQuery, [type, level, value, points], (err, result, rows) => {
+    db.query(addTaskQuery, [type, level, value, points], (err) => {
         if (err) {
             console.log(err);
         } else {
-            db.query("SELECT MAX(id) AS lastQuestionId FROM question", (err, result, rows) => {
+            db.query("SELECT MAX(id) AS lastQuestionId FROM question", (err, result) => {
                 const number = result[0].lastQuestionId;
                 const answerToInsert = [number, answer]
-                db.query("INSERT INTO answer (question_id, value) VALUES (?,?)", answerToInsert, (err, result, rows) => {
+                db.query("INSERT INTO answer (question_id, value) VALUES (?,?)", answerToInsert, (err) => {
                     if (err) console.log(err);
                     else {
                         console.log('inserted');
                     }
                     if (req.body.options) {
                         for (let i = 0; i < req.body.options.length; i++) {
-                            db.query('INSERT INTO options (question_id, value) VALUES (?,?)', [number, req.body.options[i]], (err, result) => {
+                            db.query('INSERT INTO options (question_id, value) VALUES (?,?)', [number, req.body.options[i]], (err) => {
                                 if (err) console.log(err);
                                 else console.log('Option inserted!');
                             })
