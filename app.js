@@ -127,7 +127,7 @@ app.post('/process',(req, res) => {
                 res.send('no such question')
             }
             else {
-                if (result[0].value === answers[i].ans.toLowerCase()) {
+                if (result[0].value === answers[i].ans) {
                     console.log('Question ' + answers[i].qid + ' is answered correctly!')
                     db.query(getPointsQuery, result[0].question_id, (err, result) => {
                         console.log(rating);
