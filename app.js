@@ -48,13 +48,13 @@ app.post("/login", (req, res) => {
                 }
                 else {
                     console.log('passwords do not match');
-                    res.send('wrong password');
+                    res.send('Wrong password!');
                 }
             })
         }
         else {
             console.log('No such user');
-            res.send('Username is not found! Please register first!');
+            res.send('Username is not found!');
         }
     })
 });
@@ -127,7 +127,7 @@ app.post('/process',(req, res) => {
                 res.send('no such question')
             }
             else {
-                if (result[0].value === answers[i].ans) {
+                if (result[0].value === answers[i].ans.toLowerCase()) {
                     console.log('Question ' + answers[i].qid + ' is answered correctly!')
                     db.query(getPointsQuery, result[0].question_id, (err, result) => {
                         console.log(rating);
@@ -143,7 +143,7 @@ app.post('/process',(req, res) => {
                         })
                     })
                 }
-                else if (result[0].value !== answers[i].ans){
+                else if (result[0].value !== answers[i].ans.toLowerCase()){
                     console.log('Question ' + answers[i].qid + ' is answered wrong!');
                 }
             }
@@ -162,7 +162,7 @@ app.post('/process',(req, res) => {
 app.post('/task', (req, res) => {
     const level = req.body.level;
     const value = req.body.text;
-    const answer = req.body.answer;
+    const answer = req.body.answer.toLowerCase();
     const type = req.body.type;
     const points = req.body.points;
     let addTaskQuery = "INSERT INTO question (type, level, value, points) VALUES (?,?,?,?)";
