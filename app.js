@@ -58,7 +58,7 @@ app.post("/login", (req, res) => {
                     console.log('passwords do not match');
                     res.header("Access-Control-Allow-Origin", "*");
                     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-                    res.send('Wrong password!');
+                    res.send({auth_error: 'Wrong password!'});
                 }
             })
         }
@@ -66,7 +66,7 @@ app.post("/login", (req, res) => {
             console.log('No such user');
             res.header("Access-Control-Allow-Origin", "*");
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-            res.send('Username is not found!');
+            res.send({auth_error: 'User is not found!'});
         }
     })
 });
