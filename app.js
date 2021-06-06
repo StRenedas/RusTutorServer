@@ -84,7 +84,7 @@ app.post("/register", (req, res) => {
             console.log('username found');
             res.header("Access-Control-Allow-Origin", "*");
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-            res.send('Please choose another username!')
+            res.send({auth_error: 'Please choose another username!'})
         }
         else {
             let sql_template = 'INSERT INTO users (username, password, email, name_surname) VALUES (?,?,?,?)';
@@ -137,8 +137,12 @@ app.post('/tasks', (req, res) => {
 app.post('/process',(req, res) => {
     let userId = req.body.userid;
     let answers = req.body.answers;
-    console.log(answers);
     let rating = req.body.rating;
+    if (answers.length === 0) {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        res.send('No answers provided!')
+    }
     const checkAnswerQuery = 'SELECT question_id, value from answer WHERE question_id = ?';
     const getPointsQuery = 'SELECT points from question WHERE id = ?';
     const updateRatingQuery = 'UPDATE users SET rating = ? WHERE user_id = ?'
