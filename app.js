@@ -11,7 +11,7 @@ app.use(cors());
 app.options('*', cors());
 app.all('/*', function (req, res, next) {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     next();
 })
@@ -19,7 +19,7 @@ app.use(bodyParser());
 /* ------------------ ROOT ROUTE ---------------------- */
 app.get("/", (req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.send("welcome on root");
 });
@@ -34,7 +34,7 @@ app.get("/ratings", (req, res) =>  {
         }
         console.log(Users);
         res.setHeader("Access-Control-Allow-Origin", "*");
-        res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
         res.send(Users);
     })
@@ -53,7 +53,7 @@ app.post("/login", (req, res) => {
             db.query(checkPasswordQuery, gotUsername, (err, result) => {
                 if(err) {
                     res.setHeader("Access-Control-Allow-Origin", "*");
-                    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
                     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
                     res.send(err);
                 }
@@ -61,14 +61,14 @@ app.post("/login", (req, res) => {
                     const token = jwt.sign({userid: result[0].gotUserid, username: gotUsername}, config.JWTSECRET, {expiresIn: 60*60})
                     console.log('User ' + gotUsername + ' authenticated');
                     res.setHeader("Access-Control-Allow-Origin", "*");
-                    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
                     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
                     res.send({userid: gotUserid, username: gotUsername, rating: gotUserRating,  isadmin: isAdmin, token: `Bearer ${token}`});
                 }
                 else {
                     console.log('passwords do not match');
                     res.setHeader("Access-Control-Allow-Origin", "*");
-                    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
                     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
                     res.send({auth_error: 'Wrong password!'});
                 }
@@ -77,7 +77,7 @@ app.post("/login", (req, res) => {
         else {
             console.log('No such user');
             res.setHeader("Access-Control-Allow-Origin", "*");
-            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
             res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
             res.send({auth_error: 'User is not found!'});
         }
@@ -96,7 +96,7 @@ app.post("/register", (req, res) => {
         if(rows.length>0) {
             console.log('username found');
             res.setHeader("Access-Control-Allow-Origin", "*");
-            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
             res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
             res.send({auth_error: 'Please choose another username!'})
         }
@@ -106,7 +106,7 @@ app.post("/register", (req, res) => {
             if(err) throw err;
             console.log('registered');
             res.setHeader("Access-Control-Allow-Origin", "*");
-            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
             res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
             res.send('Registration successful!');
             })
@@ -124,7 +124,7 @@ app.post('/tasks', (req, res) => {
     db.query(getTasksQuery, queryParams, (err, result) => {
         if(err) {
             res.setHeader("Access-Control-Allow-Origin", "*");
-            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
             res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
             res.send('Query error, please try again');
         }
@@ -135,7 +135,7 @@ app.post('/tasks', (req, res) => {
                     Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points});
                 }
                 res.setHeader("Access-Control-Allow-Origin", "*");
-                res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
                 res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
                 res.send(Tasks);
             }
@@ -144,7 +144,7 @@ app.post('/tasks', (req, res) => {
                     Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points, options: []});
                 }
                 res.setHeader("Access-Control-Allow-Origin", "*");
-                res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
                 res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
                 res.send(Tasks);
             }
@@ -158,7 +158,7 @@ app.post('/process',(req, res) => {
     let rating = req.body.rating;
     if (answers.length === 0) {
         res.setHeader("Access-Control-Allow-Origin", "*");
-        res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
         res.send('No answers provided!')
     }
@@ -170,7 +170,7 @@ app.post('/process',(req, res) => {
         db.query(checkAnswerQuery, answers[i].qid, (err, result) => {
             if(err) {
                 res.setHeader("Access-Control-Allow-Origin", "*");
-                res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
                 res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
                 res.send('no such question')
             }
@@ -203,7 +203,7 @@ app.post('/process',(req, res) => {
         } else {
             console.log(result[0].rating);
             res.setHeader("Access-Control-Allow-Origin", "*");
-            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
             res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
             res.send({ updatedRating: result[0].rating});
         }
@@ -237,7 +237,7 @@ app.post('/task', (req, res) => {
                             })
                         }
                         res.setHeader("Access-Control-Allow-Origin", "*");
-                        res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                        res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
                         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
                         res.send('Question inserted!')
                     }
@@ -260,7 +260,7 @@ app.post("/options",(req, res) => {
            }
            console.log(opt);
            res.setHeader("Access-Control-Allow-Origin", "*");
-           res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+           res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
            res.send(opt);
        }
@@ -274,7 +274,7 @@ app.post("/rating", (req, res) => {
         } else {
             console.log(result[0].rating);
             res.setHeader("Access-Control-Allow-Origin", "*");
-            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Methods");
             res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
             res.send({ updatedRating: result[0].rating});
         }
