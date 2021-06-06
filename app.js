@@ -10,15 +10,15 @@ const app = express();
 app.use(cors());
 app.options('*', cors());
 app.all('/*', function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
     next();
 })
 app.use(bodyParser());
 /* ------------------ ROOT ROUTE ---------------------- */
 app.get("/", (req, res) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.send("welcome on root");
 });
 /* ------------------ RATINGS ROUTE ---------------------- */
@@ -31,8 +31,8 @@ app.get("/ratings", (req, res) =>  {
             Users.push({id: result[i].user_id, username: result[i].name_surname, rating: result[i].rating});
         }
         console.log(Users);
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         res.send(Users);
     })
 });
@@ -49,29 +49,29 @@ app.post("/login", (req, res) => {
             let gotUserRating = rows[0].rating;
             db.query(checkPasswordQuery, gotUsername, (err, result) => {
                 if(err) {
-                    res.header("Access-Control-Allow-Origin", "*");
-                    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                    res.setHeader("Access-Control-Allow-Origin", "*");
+                    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
                     res.send(err);
                 }
                 else if(bcrypt.compareSync(gotPassword, result[0].password)) {
                     const token = jwt.sign({userid: result[0].gotUserid, username: gotUsername}, config.JWTSECRET, {expiresIn: 60*60})
                     console.log('User ' + gotUsername + ' authenticated');
-                    res.header("Access-Control-Allow-Origin", "*");
-                    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                    res.setHeader("Access-Control-Allow-Origin", "*");
+                    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
                     res.send({userid: gotUserid, username: gotUsername, rating: gotUserRating,  isadmin: isAdmin, token: `Bearer ${token}`});
                 }
                 else {
                     console.log('passwords do not match');
-                    res.header("Access-Control-Allow-Origin", "*");
-                    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                    res.setHeader("Access-Control-Allow-Origin", "*");
+                    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
                     res.send({auth_error: 'Wrong password!'});
                 }
             })
         }
         else {
             console.log('No such user');
-            res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             res.send({auth_error: 'User is not found!'});
         }
     })
@@ -88,8 +88,8 @@ app.post("/register", (req, res) => {
     db.query(sql_getallusers, username, (err, rows) => {
         if(rows.length>0) {
             console.log('username found');
-            res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             res.send({auth_error: 'Please choose another username!'})
         }
         else {
@@ -97,8 +97,8 @@ app.post("/register", (req, res) => {
             db.query(sql_template, user, (err) => {
             if(err) throw err;
             console.log('registered');
-            res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             res.send('Registration successful!');
             })
         }
@@ -114,8 +114,8 @@ app.post('/tasks', (req, res) => {
     const getTasksQuery = 'SELECT * FROM `question` WHERE id NOT IN (SELECT questions_id FROM questions_passed WHERE user_id = ?) AND level = ? AND type = ?';
     db.query(getTasksQuery, queryParams, (err, result) => {
         if(err) {
-            res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             res.send('Query error, please try again');
         }
         else {
@@ -124,16 +124,16 @@ app.post('/tasks', (req, res) => {
                 for (let i = 0; i < result.length; i++) {
                     Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points});
                 }
-                res.header("Access-Control-Allow-Origin", "*");
-                res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                res.setHeader("Access-Control-Allow-Origin", "*");
+                res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
                 res.send(Tasks);
             }
             if (type === 3 || type === 2) {
                 for (let i = 0; i < result.length; i++) {
                     Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points, options: []});
                 }
-                res.header("Access-Control-Allow-Origin", "*");
-                res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                res.setHeader("Access-Control-Allow-Origin", "*");
+                res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
                 res.send(Tasks);
             }
         }
@@ -145,8 +145,8 @@ app.post('/process',(req, res) => {
     let answers = req.body.answers;
     let rating = req.body.rating;
     if (answers.length === 0) {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         res.send('No answers provided!')
     }
     const checkAnswerQuery = 'SELECT question_id, value from answer WHERE question_id = ?';
@@ -156,8 +156,8 @@ app.post('/process',(req, res) => {
     for(let i = 0; i < answers.length; i++) {
         db.query(checkAnswerQuery, answers[i].qid, (err, result) => {
             if(err) {
-                res.header("Access-Control-Allow-Origin", "*");
-                res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                res.setHeader("Access-Control-Allow-Origin", "*");
+                res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
                 res.send('no such question')
             }
             else {
@@ -177,7 +177,7 @@ app.post('/process',(req, res) => {
                         })
                     })
                 }
-                else if (result[0].value !== answers[i].ans.toLowerCase()){
+                else if (result[0].value !== answers[i].ans){
                     console.log('Question ' + answers[i].qid + ' is answered wrong!');
                 }
             }
@@ -188,8 +188,8 @@ app.post('/process',(req, res) => {
             console.log(err);
         } else {
             console.log(result[0].rating);
-            res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             res.send({ updatedRating: result[0].rating});
         }
     })
@@ -221,8 +221,8 @@ app.post('/task', (req, res) => {
                                 else console.log('Option inserted!');
                             })
                         }
-                        res.header("Access-Control-Allow-Origin", "*");
-                        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                        res.setHeader("Access-Control-Allow-Origin", "*");
+                        res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
                         res.send('Question inserted!')
                     }
 
@@ -243,8 +243,8 @@ app.post("/options",(req, res) => {
                opt.push(result[i].value);
            }
            console.log(opt);
-           res.header("Access-Control-Allow-Origin", "*");
-           res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+           res.setHeader("Access-Control-Allow-Origin", "*");
+           res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
            res.send(opt);
        }
     })
@@ -256,8 +256,8 @@ app.post("/rating", (req, res) => {
             console.log(err);
         } else {
             console.log(result[0].rating);
-            res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             res.send({ updatedRating: result[0].rating});
         }
     })
