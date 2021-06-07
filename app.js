@@ -158,14 +158,14 @@ app.post('/process',(req, res) => {
             }
         })
     }
-    db.query('SELECT rating FROM users WHERE user_id = ?', userId, (err, result) => {
+/*    db.query('SELECT rating FROM users WHERE user_id = ?', userId, (err, result) => {
         if (err) {
             console.log(err);
         } else {
             console.log(result[0].rating);
             res.send({ updatedRating: result[0].rating});
         }
-    })
+    })*/
 })
 /* ------------------ ADD TASKS ROUTE ---------------------- */
 app.post('/task', (req, res) => {
