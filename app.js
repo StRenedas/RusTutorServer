@@ -184,10 +184,6 @@ app.post('/task', (req, res) => {
                 const answerToInsert = [number, answer]
                 db.query("INSERT INTO answer (question_id, value) VALUES (?,?)", answerToInsert, (err) => {
                     if (err) console.log(err);
-                    else {
-                        console.log('inserted');
-                        res.send('Question inserted!')
-                    }
                     if (req.body.options) {
                         for (let i = 0; i < req.body.options.length; i++) {
                             db.query('INSERT INTO options (question_id, value) VALUES (?,?)', [number, req.body.options[i]], (err) => {
@@ -195,6 +191,10 @@ app.post('/task', (req, res) => {
                                 else console.log('Option inserted!');
                             })
                         }
+                        res.send('Question inserted!')
+                    }
+                    else {
+                        console.log('inserted');
                         res.send('Question inserted!')
                     }
                 })
