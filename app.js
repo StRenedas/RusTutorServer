@@ -158,14 +158,14 @@ app.post('/process',(req, res) => {
             }
         })
     }
-/*    db.query('SELECT rating FROM users WHERE user_id = ?', userId, (err, result) => {
+    db.query('SELECT rating FROM users WHERE user_id = ?', userId, (err, result) => {
         if (err) {
             console.log(err);
         } else {
             console.log(result[0].rating);
             res.send({ updatedRating: result[0].rating});
         }
-    })*/
+    })
 })
 /* ------------------ ADD TASKS ROUTE ---------------------- */
 app.post('/task', (req, res) => {
@@ -186,6 +186,7 @@ app.post('/task', (req, res) => {
                     if (err) console.log(err);
                     else {
                         console.log('inserted');
+                        res.send('Question inserted!')
                     }
                     if (req.body.options) {
                         for (let i = 0; i < req.body.options.length; i++) {
@@ -196,7 +197,6 @@ app.post('/task', (req, res) => {
                         }
                         res.send('Question inserted!')
                     }
-
                 })
             });
         }
