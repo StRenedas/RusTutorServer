@@ -14,7 +14,7 @@ app.get("/", (req, res) => {
     res.send("welcome on root");
 });
 /* ------------------ RATINGS ROUTE ---------------------- */
-app.get("/ratings", checkToken, (req, res) =>  {
+app.post("/ratings", checkToken, (req, res) =>  {
     let sql_query = 'SELECT * FROM users WHERE is_admin = 0 ORDER BY name_surname';
     db.query(sql_query, (err, result) => {
         let Users = []
