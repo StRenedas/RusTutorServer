@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
 });
 /* ------------------ RATINGS ROUTE ---------------------- */
 app.post("/ratings", checkToken, (req, res) =>  {
-    let sql_query = 'SELECT * FROM users WHERE is_admin = 0 ORDER BY name_surname';
+    let sql_query = 'SELECT * FROM users WHERE is_admin = 0 ORDER BY rating DESC';
     db.query(sql_query, (err, result) => {
         let Users = []
         if(err) throw err;
