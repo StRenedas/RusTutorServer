@@ -14,7 +14,7 @@ app.get("/", (req, res) => {
     res.send("welcome on root");
 });
 /* ------------------ RATINGS ROUTE ---------------------- */
-app.get("/ratings", (req, res) =>  {
+app.get("/ratings", checkToken, (req, res) =>  {
     let sql_query = 'SELECT * FROM users WHERE is_admin = 0 ORDER BY name_surname';
     db.query(sql_query, (err, result) => {
         let Users = []
@@ -83,7 +83,7 @@ app.post("/register", (req, res) => {
     })
 });
 /* ------------------ GET TASKS ROUTE ---------------------- */
-app.post('/tasks', (req, res) => {
+app.post('/tasks', checkToken, (req, res) => {
     const type = req.body.type;
     const level = req.body.level;
     const user_id = req.body.userid;
@@ -118,7 +118,7 @@ app.post('/tasks', (req, res) => {
     })
 })
 /* ------------------ CHECK ANSWERS ROUTE ---------------------- */
-app.post('/process',(req, res) => {
+app.post('/process', checkToken, (req, res) => {
     let userId = req.body.userid;
     let answers = req.body.answers;
     let rating = req.body.rating;
@@ -168,7 +168,7 @@ app.post('/process',(req, res) => {
     })
 })
 /* ------------------ ADD TASKS ROUTE ---------------------- */
-app.post('/task', (req, res) => {
+app.post('/task', checkToken, (req, res) => {
     const level = req.body.level;
     const value = req.body.text;
     const answer = req.body.answer.toLowerCase();
@@ -203,7 +203,7 @@ app.post('/task', (req, res) => {
     })
 })
 /* ------------------ GET OPTIONS ROUTE ---------------------- */
-app.post("/options",(req, res) => {
+app.post("/options", (req, res) => {
     const qid = req.body.id;
     console.log('Requested options for task ' + qid);
     db.query('SELECT value FROM options WHERE question_id = ? UNION ALL SELECT value FROM answer WHERE question_id = ? ORDER BY RAND()', [qid, qid], (err, result) => {
@@ -218,7 +218,7 @@ app.post("/options",(req, res) => {
        }
     })
 })
-app.post("/rating", (req, res) => {
+app.post("/rating", checkToken, (req, res) => {
     const userId = req.body.userid;
     db.query('SELECT rating FROM users WHERE user_id = ?', userId, (err, result) => {
         if (err) {
@@ -229,6 +229,16 @@ app.post("/rating", (req, res) => {
         }
     })
 })
+
+function checkToken (req, res, next) {
+    const authHeader = req.body.token;
+    const token = authHeader && authHeader.split(' ')[1];
+    if (token == null) return res.sendStatus(401);
+    jwt.verify(token, config.JWTSECRET, (err) => {
+        if (err) return res.sendStatus(403);
+        else next();
+     })
+};
 app.listen(PORT, ()=> {
     console.log(`Server is running on port ${PORT}.`);
 });
