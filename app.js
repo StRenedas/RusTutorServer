@@ -32,8 +32,8 @@ app.post("/login", (req, res) => {
     let gotPassword = req.body.logpassword;
     let sql_query = 'SELECT `user_id`, `username`, `rating`, `is_admin` FROM `user` WHERE username = ?';
     let checkPasswordQuery = 'SELECT password FROM user WHERE username = ?'
-    db.query(sql_query, gotUsername,(err, rows) => {
-        if(rows.length>0) {
+    db.query(sql_query, gotUsername, (err, rows) => {
+        if(rows.length>0 && rows[0].username === gotUsername) {
             let gotUserid = rows[0].user_id;
             let isAdmin = rows[0].is_admin;
             let gotUserRating = rows[0].rating;
@@ -68,7 +68,7 @@ app.post("/register", (req, res) => {
     let user = [username, password, email, name];
     let sql_getallusers = "SELECT username from user WHERE username = ?";
     db.query(sql_getallusers, username, (err, rows) => {
-        if(rows.length>0) {
+        if(rows.length>0 && rows[0].username === username) {
             console.log('username found');
             res.send({auth_error: 'Please choose another username!'})
         }
@@ -135,7 +135,7 @@ app.post('/process', checkToken, (req, res) => {
                 res.send('no such question')
             }
             else {
-                if (result[0].value === answers[i].ans) {
+                if (result[0].value.toLowerCase() === answers[i].ans.toLowerCase()) {
                     console.log('Question ' + answers[i].qid + ' is answered correctly!')
                     db.query(getPointsQuery, result[0].question_id, (err, result) => {
                         console.log(rating);
