@@ -186,7 +186,7 @@ app.post('/task', checkToken, (req, res) => {
                     if (err) console.log(err);
                     if (req.body.options) {
                         for (let i = 0; i < req.body.options.length; i++) {
-                            db.query('INSERT INTO options (question_id, value) VALUES (?,?)', [number, req.body.options[i]], (err) => {
+                            db.query('INSERT INTO option (question_id, value) VALUES (?,?)', [number, req.body.options[i]], (err) => {
                                 if (err) console.log(err);
                                 else console.log('Option inserted!');
                             })
@@ -206,7 +206,7 @@ app.post('/task', checkToken, (req, res) => {
 app.post("/options", (req, res) => {
     const qid = req.body.id;
     console.log('Requested options for task ' + qid);
-    db.query('SELECT value FROM options WHERE question_id = ? UNION ALL SELECT value FROM answer WHERE question_id = ? ORDER BY RAND()', [qid, qid], (err, result) => {
+    db.query('SELECT value FROM option WHERE question_id = ? UNION ALL SELECT value FROM answer WHERE question_id = ? ORDER BY RAND()', [qid, qid], (err, result) => {
        if (err) console.log(err);
        else {
            let opt = []
