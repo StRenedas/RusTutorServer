@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
 });
 /* ------------------ RATINGS ROUTE ---------------------- */
 app.post("/ratings", checkToken, (req, res) =>  {
-    let sql_query = 'SELECT * FROM users WHERE is_admin = 0 ORDER BY rating DESC';
+    let sql_query = 'SELECT * FROM user WHERE is_admin = 0 ORDER BY rating DESC';
     db.query(sql_query, (err, result) => {
         let Users = []
         if(err) throw err;
@@ -30,8 +30,8 @@ app.post("/ratings", checkToken, (req, res) =>  {
 app.post("/login", (req, res) => {
     let gotUsername = req.body.logusername;
     let gotPassword = req.body.logpassword;
-    let sql_query = 'SELECT `user_id`, `username`, `rating`, `is_admin` FROM `users` WHERE username = ?';
-    let checkPasswordQuery = 'SELECT password FROM users WHERE username = ?'
+    let sql_query = 'SELECT `user_id`, `username`, `rating`, `is_admin` FROM `user` WHERE username = ?';
+    let checkPasswordQuery = 'SELECT password FROM user WHERE username = ?'
     db.query(sql_query, gotUsername,(err, rows) => {
         if(rows.length>0) {
             let gotUserid = rows[0].user_id;
@@ -66,14 +66,14 @@ app.post("/register", (req, res) => {
     let password = bcrypt.hashSync(req.body.password, salt);
     let email = req.body.email;
     let user = [username, password, email, name];
-    let sql_getallusers = "SELECT username from users WHERE username = ?";
+    let sql_getallusers = "SELECT username from user WHERE username = ?";
     db.query(sql_getallusers, username, (err, rows) => {
         if(rows.length>0) {
             console.log('username found');
             res.send({auth_error: 'Please choose another username!'})
         }
         else {
-            let sql_template = 'INSERT INTO users (username, password, email, name_surname) VALUES (?,?,?,?)';
+            let sql_template = 'INSERT INTO user (username, password, email, name_surname) VALUES (?,?,?,?)';
             db.query(sql_template, user, (err) => {
             if(err) throw err;
             console.log('registered');
@@ -89,7 +89,7 @@ app.post('/tasks', checkToken, (req, res) => {
     const user_id = req.body.userid;
     console.log('User ' + user_id + 'tries to get level ' + level + 'and type ' + type + 'tasks')
     const queryParams = [user_id, level, type];
-    const getTasksQuery = 'SELECT * FROM `question` WHERE id NOT IN (SELECT questions_id FROM questions_passed WHERE user_id = ?) AND level = ? AND type = ?';
+    const getTasksQuery = 'SELECT * FROM `question` WHERE id NOT IN (SELECT questions_id FROM question_passed WHERE user_id = ?) AND level = ? AND type = ?';
     db.query(getTasksQuery, queryParams, (err, result) => {
         if(err) {
             res.send('Query error, please try again');
@@ -127,8 +127,8 @@ app.post('/process', checkToken, (req, res) => {
     }
     const checkAnswerQuery = 'SELECT question_id, value from answer WHERE question_id = ?';
     const getPointsQuery = 'SELECT points from question WHERE id = ?';
-    const updateRatingQuery = 'UPDATE users SET rating = ? WHERE user_id = ?'
-    const updatePassedQuery = 'INSERT INTO questions_passed (user_id, questions_id) VALUES (?, ?)'
+    const updateRatingQuery = 'UPDATE user SET rating = ? WHERE user_id = ?'
+    const updatePassedQuery = 'INSERT INTO question_passed (user_id, questions_id) VALUES (?, ?)'
     for(let i = 0; i < answers.length; i++) {
         db.query(checkAnswerQuery, answers[i].qid, (err, result) => {
             if(err) {
@@ -158,7 +158,7 @@ app.post('/process', checkToken, (req, res) => {
             }
         })
     }
-    db.query('SELECT rating FROM users WHERE user_id = ?', userId, (err, result) => {
+    db.query('SELECT rating FROM user WHERE user_id = ?', userId, (err, result) => {
         if (err) {
             console.log(err);
         } else {
@@ -220,7 +220,7 @@ app.post("/options", (req, res) => {
 })
 app.post("/rating", checkToken, (req, res) => {
     const userId = req.body.userid;
-    db.query('SELECT rating FROM users WHERE user_id = ?', userId, (err, result) => {
+    db.query('SELECT rating FROM user WHERE user_id = ?', userId, (err, result) => {
         if (err) {
             console.log(err);
         } else {
