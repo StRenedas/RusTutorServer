@@ -111,7 +111,8 @@ app.post('/tasks', checkToken, (req, res) => {
     const user_id = req.body.userid;
     console.log('User ' + user_id + 'tries to get level ' + level + 'and type ' + type + 'tasks')
     const queryParams = [user_id, level, type];
-    const getTasksQuery = 'SELECT * FROM `question` WHERE AND level = ? AND type = ?';
+    const getTasksQuery = 'SELECT * FROM `question` WHERE level = ? AND type = ?';
+    console.log('hi');
     db.query(getTasksQuery, queryParams, (err, result) => {
         if(err) {
             res.send('Query error, please try again');
@@ -121,6 +122,7 @@ app.post('/tasks', checkToken, (req, res) => {
             if (type === 1) {
                 for (let i = 0; i < result.length; i++) {
                     Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points});
+                    console.log(Tasks);
                 }
                 res.send(Tasks);
             }
