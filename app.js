@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require("./db");
 const config = require("./config");
-const users = require('./Methods/Users')
+const stats = require('./Methods/Stats')
 const app = express();
 app.use(cors());
 app.use(bodyParser());
@@ -28,21 +28,26 @@ app.post("/ratings", checkToken, (req, res) =>  {
         res.send(Users);
     })
 });
-app.get("/stats", async (req, res) => {
-    let Users = {};
-    let TotalQuestions = [];
-    await users.getTotalQuestions().then((result) => {
-        TotalQuestions = result;
-    }).catch((err) => {
-        console.log(err);
+app.post("/stats", (req, res) => {
+    let id = req.body.userid;
+    let username = ''
+    let getUnresolved = 'SELECT * FROM `question` WHERE id NOT IN (SELECT questions_id FROM question_passed WHERE user_id = ?) ORDER BY question.level';
+    stats.getNameSurname(id)
+        .then(name => {
+            username = name;
+        })
+    db.query(getUnresolved, [id], (err, result) => {
+        let Errors = [];
+        if (err) throw err;
+        else {
+            for (let i = 0; i < result.length; i++) {
+                Errors.push({value: result[i].value, qid: result[i].id, type: result[i].type, level: result[i].level})
+            }
+        }
+        res.send(Errors);
     })
-    await users.getAllUsers().then((result) => {
-        Users = result;
-    }).catch((err) => {
-        console.log(err);
-    })
-    res.send([Users, TotalQuestions]);
-})
+});
+
 /* ------------------ SIGNIN ROUTE ---------------------- */
 app.post("/login", (req, res) => {
     let gotUsername = req.body.logusername;
@@ -246,23 +251,65 @@ app.post("/rating", checkToken, (req, res) => {
         }
     })
 })
-app.post('/test', async (req, res) => {
+
+/*app.post('/test2', async (req, res) => {
+    let id = req.body.userid;
+    let corrsum = [];
+    for (let i = 1; i < 4; i++) {
+        await stats.getCorrectByLevel(id, i).then((correctByLevel) => {
+            corrsum.push(correctByLevel);
+        }).catch((err) => {
+            console.log(err);
+        })
+    }
+    res.send(corrsum);
+})
+app.post('/test3', async (req, res) => {
     let id = req.body.userid;
     let level = req.body.level;
-    await users.getCorrectByLevel(id, level).then((correctByLevel) => {
-        res.send(correctByLevel);
-    }).catch((err) => {
-        console.log(err);
-    })
-})
-app.post('/test2', async (req, res) => {
-    let id = req.body.userid;
-    let corrsum = 0;
-    await users.getAllCorrects(id).then((correctByLevel) => {
-        corrsum = correctByLevel;
-    }).catch((err) => {
-        console.log(err);
-    })
+    let corrT = [];
+    for (let i = 1; i < 4; i++) {
+        await stats.getCorrectByType(id, level, i).then((correctByType) => {
+            corrT.push(correctByType);
+        }).catch((err) => {
+            console.log(err);
+        })
+    }
+    res.send(corrT);
+})*/
+app.post('/statistics', async (req, res) => {
+    let UserTasks = [];
+    const id = req.body.userid;
+    for (let i = 1; i < 4; i++) {
+        await stats.getAllInfo(id, i)
+            .then(totalByLevel => {
+            UserTasks.push({level: i, total: totalByLevel});
+            console.log(UserTasks);
+        }).catch((err) => {
+            console.log(err);
+        })
+    }
+    for (let j = 0; j < UserTasks.length; j++) {
+        for (let i = 1; i < 4; i++) {
+            await stats.getAllTypes(id, UserTasks[j].level, i)
+                .then(totalByType => {
+                    if (i === 1) {
+                        UserTasks[j].translate = totalByType;
+                    }
+                    if (i === 2) {
+                        UserTasks[j].pics = totalByType;
+                    }
+                    if (i === 3) {
+                        UserTasks[j].choice = totalByType;
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                })
+        }
+    }
+    console.log(UserTasks);
+    res.send(UserTasks)
 })
 function checkToken (req, res, next) {
     const authHeader = req.body.token;
