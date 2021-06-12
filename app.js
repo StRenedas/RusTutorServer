@@ -125,14 +125,16 @@ app.post('/tasks', checkToken, (req, res) => {
                 res.send(Tasks);
             }
             if (type === 2) {
+                let opts = [];
                 for (let i = 0; i < result.length; i++) {
-                    Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points, options: []});
+                    Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points, options: opts});
                 }
                 res.send(Tasks);
             }
             if (type === 3) {
+                let opts = [];
                 for (let i = 0; i < result.length; i++) {
-                    Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points, options: []});
+                    Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points, options: opts});
                 }
                 res.send(Tasks);
             }
