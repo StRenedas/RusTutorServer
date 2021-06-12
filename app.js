@@ -19,9 +19,10 @@ app.post("/ratings", checkToken, (req, res) =>  {
     let sql_query = 'SELECT * FROM user WHERE is_admin = 0 ORDER BY rating DESC';
     db.query(sql_query, (err, result) => {
         let Users = []
+        let resolved = []
         if(err) throw err;
         for (let i = 0; i < result.length; i++) {
-            Users.push({id: result[i].user_id, username: result[i].name_surname, email: result[i].email, rating: result[i].rating, correctsByLevel: [1]});
+            Users.push({id: result[i].user_id, username: result[i].name_surname, email: result[i].email, rating: result[i].rating, resolved: resolved });
         }
         console.log(Users);
         res.send(Users);
@@ -40,14 +41,6 @@ app.get("/stats", async (req, res) => {
     }).catch((err) => {
         console.log(err);
     })
-/*    for (let i = 0; i < Users.length; i++) {
-        users.getResolvedQuestionsById(Users[i]).then((result) => {
-            console.log('ok');
-
-        }).catch((err) => {
-            console.log(err);
-        })
-    }*/
     res.send([Users, TotalQuestions]);
 })
 /* ------------------ SIGNIN ROUTE ---------------------- */
