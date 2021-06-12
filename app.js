@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require("./db");
 const config = require("./config");
+const users = require('./Methods/Users')
 const app = express();
 app.use(cors());
 app.use(bodyParser());
@@ -26,6 +27,29 @@ app.post("/ratings", checkToken, (req, res) =>  {
         res.send(Users);
     })
 });
+app.get("/stats", async (req, res) => {
+    let Users = {};
+    let TotalQuestions = [];
+    await users.getTotalQuestions().then((result) => {
+        TotalQuestions = result;
+    }).catch((err) => {
+        console.log(err);
+    })
+    await users.getAllUsers().then((result) => {
+        Users = result;
+    }).catch((err) => {
+        console.log(err);
+    })
+/*    for (let i = 0; i < Users.length; i++) {
+        users.getResolvedQuestionsById(Users[i]).then((result) => {
+            console.log('ok');
+
+        }).catch((err) => {
+            console.log(err);
+        })
+    }*/
+    res.send([Users, TotalQuestions]);
+})
 /* ------------------ SIGNIN ROUTE ---------------------- */
 app.post("/login", (req, res) => {
     let gotUsername = req.body.logusername;
@@ -89,7 +113,7 @@ app.post('/tasks', checkToken, (req, res) => {
     const user_id = req.body.userid;
     console.log('User ' + user_id + 'tries to get level ' + level + 'and type ' + type + 'tasks')
     const queryParams = [user_id, level, type];
-    const getTasksQuery = 'SELECT * FROM `question` WHERE id NOT IN (SELECT questions_id FROM question_passed WHERE user_id = ?) AND level = ? AND type = ?';
+    const getTasksQuery = 'SELECT * FROM `question` WHERE AND level = ? AND type = ?';
     db.query(getTasksQuery, queryParams, (err, result) => {
         if(err) {
             res.send('Query error, please try again');
@@ -229,7 +253,27 @@ app.post("/rating", checkToken, (req, res) => {
         }
     })
 })
-
+app.post('/test', async (req, res) => {
+    let id = req.body.userid;
+    let level = req.body.level;
+    let corrsum = {};
+    await users.getCorrectByLevel(id, level).then((correctByLevel) => {
+        corrsum = correctByLevel;
+    }).catch((err) => {
+        console.log(err);
+    })
+    res.send(corrsum);
+})
+app.post('/test2', async (req, res) => {
+    let id = req.body.userid;
+    let corrsum = {};
+    await users.getAllCorrects(id).then((correctByLevel) => {
+        corrsum = correctByLevel;
+    }).catch((err) => {
+        console.log(err);
+    })
+    res.send(corrsum);
+})
 function checkToken (req, res, next) {
     const authHeader = req.body.token;
     const token = authHeader && authHeader.split(' ')[1];
