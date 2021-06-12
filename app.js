@@ -21,7 +21,7 @@ app.post("/ratings", checkToken, (req, res) =>  {
         let Users = []
         if(err) throw err;
         for (let i = 0; i < result.length; i++) {
-            Users.push({id: result[i].user_id, username: result[i].name_surname, email: result[i].email, rating: result[i].rating, correctsByLevel: []});
+            Users.push({id: result[i].user_id, username: result[i].name_surname, email: result[i].email, rating: result[i].rating, correctsByLevel: [1]});
         }
         console.log(Users);
         res.send(Users);
@@ -256,23 +256,20 @@ app.post("/rating", checkToken, (req, res) => {
 app.post('/test', async (req, res) => {
     let id = req.body.userid;
     let level = req.body.level;
-    let corrsum = {};
     await users.getCorrectByLevel(id, level).then((correctByLevel) => {
-        corrsum = correctByLevel;
+        res.send(correctByLevel);
     }).catch((err) => {
         console.log(err);
     })
-    res.send(corrsum);
 })
 app.post('/test2', async (req, res) => {
     let id = req.body.userid;
-    let corrsum = {};
+    let corrsum = 0;
     await users.getAllCorrects(id).then((correctByLevel) => {
         corrsum = correctByLevel;
     }).catch((err) => {
         console.log(err);
     })
-    res.send(corrsum);
 })
 function checkToken (req, res, next) {
     const authHeader = req.body.token;
