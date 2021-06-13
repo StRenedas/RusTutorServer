@@ -86,8 +86,7 @@ app.post("/register", (req, res) => {
     let name = req.body.name;
     const salt = bcrypt.genSaltSync(10);
     let password = bcrypt.hashSync(req.body.password, salt);
-    let email = req.body.email;
-    let user = [username, password, email, name];
+    let user = [username, password, name];
     let sql_getallusers = "SELECT username from user WHERE username = ?";
     db.query(sql_getallusers, username, (err, rows) => {
         if(rows.length>0 && rows[0].username === username) {
@@ -95,7 +94,7 @@ app.post("/register", (req, res) => {
             res.send({auth_error: 'Please choose another username!'})
         }
         else {
-            let sql_template = 'INSERT INTO user (username, password, email, name_surname) VALUES (?,?,?,?)';
+            let sql_template = 'INSERT INTO user (username, password, name_surname) VALUES (?,?,?)';
             db.query(sql_template, user, (err) => {
             if(err) throw err;
             console.log('registered');
@@ -313,6 +312,12 @@ app.post('/statistics', async (req, res) => {
     }
     console.log(UserTasks);
     res.send(UserTasks)
+})
+app.post('/name', (req, res) => {
+    const id = req.body.userid;
+    stats.getNameSurname(id).then(name => {
+        res.send(name);
+    })
 })
 function checkToken (req, res, next) {
     const authHeader = req.body.token;
