@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
     res.send("welcome on root");
 });
 /* ------------------ RATINGS ROUTE ---------------------- */
-app.post("/ratings", checkToken, (req, res) =>  {
+app.get("/ratings", checkToken, (req, res) =>  {
     let sql_query = 'SELECT * FROM user WHERE is_admin = 0 ORDER BY rating DESC';
     db.query(sql_query, (err, result) => {
         let Users = []
@@ -28,8 +28,8 @@ app.post("/ratings", checkToken, (req, res) =>  {
     })
 });
 /* ------------------ STATS ROUTE ---------------------- */
-app.post("/errors/", checkToken , async (req, res) => {
-    let id = req.body.userid;
+app.get("/errors/:userid", checkToken , async (req, res) => {
+    let id = req.params.userid;
     let username = '';
     let Errors = [];
     await stats.getNameSurname(id)
@@ -239,8 +239,9 @@ app.post("/options", checkToken, (req, res) => {
        }
     })
 })
-app.post("/rating", checkToken, (req, res) => {
-    const userId = req.body.userid;
+/* ------------------ GET RATING ROUTE ---------------------- */
+app.get("/rating/:userid", checkToken, (req, res) => {
+    const userId = req.params.userid;
     db.query('SELECT rating FROM user WHERE user_id = ?', userId, (err, result) => {
         if (err) {
             console.log(err);
@@ -250,9 +251,9 @@ app.post("/rating", checkToken, (req, res) => {
         }
     })
 })
-app.post('/statistics', checkToken, async (req, res) => {
+app.get('/statistics/:userid', checkToken, async (req, res) => {
     let UserTasks = [];
-    const id = req.body.userid;
+    const id = req.params.userid;
     for (let i = 1; i < 4; i++) {
         await stats.getAllInfo(id, i)
             .then(totalByLevel => {
@@ -283,7 +284,8 @@ app.post('/statistics', checkToken, async (req, res) => {
     res.send(UserTasks)
 })
 function checkToken (req, res, next) {
-    const authHeader = req.body.token;
+    const authHeader = req.headers['authorization'];
+    console.log(authHeader);
     const token = authHeader && authHeader.split(' ')[1];
     if (token == null) return res.sendStatus(401);
     jwt.verify(token, config.JWTSECRET, (err) => {
