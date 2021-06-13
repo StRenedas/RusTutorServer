@@ -251,6 +251,7 @@ app.get("/rating/:userid", checkToken, (req, res) => {
         }
     })
 })
+/* ------------------ GET STATISTICS ROUTE ---------------------- */
 app.get('/statistics/:userid', checkToken, async (req, res) => {
     let UserTasks = [];
     const id = req.params.userid;
@@ -282,6 +283,37 @@ app.get('/statistics/:userid', checkToken, async (req, res) => {
         }
     }
     res.send(UserTasks)
+})
+app.get('/total', async (req, res) => {
+    let TotalTasks = [];
+    for (let i = 1; i < 4; i++) {
+        await stats.getTotalQuestions(i)
+            .then(totalByLevel => {
+                TotalTasks.push({level: i, total: totalByLevel});
+            }).catch((err) => {
+                console.log(err);
+            })
+    }
+    for (let j = 0; j < TotalTasks.length; j++) {
+        for (let i = 1; i < 4; i++) {
+            await stats.getTotalTypes(TotalTasks[j].level, i)
+                .then(totalByType => {
+                    if (i === 1) {
+                        TotalTasks[j].translate = totalByType;
+                    }
+                    if (i === 2) {
+                        TotalTasks[j].pics = totalByType;
+                    }
+                    if (i === 3) {
+                        TotalTasks[j].choice = totalByType;
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                })
+        }
+    }
+    res.send(TotalTasks);
 })
 function checkToken (req, res, next) {
     const authHeader = req.headers['authorization'];

@@ -1,15 +1,32 @@
 const db = require('../db.js');
-let getTotalQuestions = () => new Promise((resolve, reject) => {
-    const getQuestionSum = "SELECT *, COUNT(id) as TotalQuestions FROM question";
-    db.query(getQuestionSum, function (err, result) {
+let getTotalQuestions = (level) => new Promise((resolve, reject) => {
+    let totalByLevel = 0;
+    const getQuestionSum = "SELECT COUNT(id) AS TOTAL FROM question WHERE level = ?";
+    db.query(getQuestionSum, [level], (err, rows) => {
         if (err) {
             reject(err);
         }
         else {
-            resolve(result);
+            totalByLevel = rows[0].TOTAL;
+            resolve(totalByLevel.toString());
         }
     });
 });
+
+let getTotalTypes = (level, type) => new Promise((resolve, reject) => {
+    let totalByType = 0;
+    const getTypes = 'SELECT COUNT(question.id) AS TOTAL FROM `question` WHERE level = ? AND type = ?';
+    db.query(getTypes, [level, type], (err, rows) => {
+        if (err) {
+            reject(err);
+        }
+        else {
+            totalByType = rows[0].TOTAL;
+            resolve(totalByType.toString());
+        }
+    })
+
+})
 
 let getUnresolved = (userid) => new Promise((resolve, reject) => {
     const getUnresolvedQuery = 'SELECT * FROM `question` WHERE id NOT IN (SELECT questions_id FROM question_passed WHERE user_id = ?) ORDER BY question.level';
@@ -25,32 +42,6 @@ let getUnresolved = (userid) => new Promise((resolve, reject) => {
     })
 })
 
-let getCorrectByType = (userid, level, type) => new Promise ((resolve, reject) => {
-    let correctByType = 0;
-    const getByTypeQuery = 'SELECT COUNT(question.id) AS CORRECT FROM `question` WHERE id IN (SELECT questions_id FROM question_passed WHERE user_id = ?) AND level = ? AND type = ?';
-    db.query(getByTypeQuery, [userid, level, type], (err, rows) => {
-        if (err) {
-            reject(err);
-        }
-        else {
-            correctByType = rows[0].CORRECT;
-            resolve(correctByType.toString());
-        }
-    })
-});
-let getAllUsers = () => new Promise((resolve, reject) => {
-    const getUsers =
-        "SELECT *, COUNT(question_passed.questions_id) AS correct FROM `user`"+
-        'RIGHT JOIN question_passed ON user.user_id = question_passed.user_id GROUP BY question_passed.user_id';
-    db.query(getUsers, function (err, result) {
-        if (err) {
-            reject(err);
-        }
-        else {
-            resolve(result);
-        }
-    })
-});
 let getAllInfo = (userid, level) => new Promise((resolve, reject) => {
     let totalByLevel = 0;
     const getLevels = 'SELECT COUNT(question.id) AS CORRECT FROM `question` WHERE id IN (SELECT questions_id FROM question_passed WHERE user_id = ?) AND level = ?'
@@ -89,9 +80,7 @@ let getNameSurname = (userid) => new Promise((resolve, reject) => {
 
 module.exports = {
     getTotalQuestions,
-    getAllUsers,
-/*    getCorrectByLevel,*/
-    getCorrectByType,
+    getTotalTypes,
     getAllInfo,
     getAllTypes,
     getNameSurname,
