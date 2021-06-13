@@ -108,7 +108,7 @@ app.post('/tasks', checkToken, (req, res) => {
     const user_id = req.body.userid;
     console.log('User ' + user_id + 'tries to get level ' + level + 'and type ' + type + 'tasks')
     const queryParams = [level, type];
-    const getTasksQuery = 'SELECT * FROM question WHERE level = ? AND type = ? ORDER BY RAND() LIMIT 10';
+    const getTasksQuery = 'SELECT * FROM question WHERE level = ? AND type = ? ORDER BY RAND() LIMIT 9';
     db.query(getTasksQuery, queryParams, (err, result) => {
         if(err) {
             res.send('Query error, please try again');
@@ -284,7 +284,7 @@ app.get('/statistics/:userid', checkToken, async (req, res) => {
     res.send(UserTasks)
 })
 /* ------------------ GET TOTAL ROUTE ---------------------- */
-app.get('/total', async (req, res) => {
+app.get('/total', checkToken , async (req, res) => {
     let TotalTasks = [];
     for (let i = 1; i < 4; i++) {
         await stats.getTotalQuestions(i)
