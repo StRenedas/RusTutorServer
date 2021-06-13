@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
     res.send("welcome on root");
 });
 /* ------------------ RATINGS ROUTE ---------------------- */
-app.get("/ratings", checkToken, (req, res) =>  {
+app.get("/users", checkToken, (req, res) =>  {
     let sql_query = 'SELECT * FROM user WHERE is_admin = 0 ORDER BY rating DESC';
     db.query(sql_query, (err, result) => {
         let Users = []
@@ -46,7 +46,6 @@ app.get("/errors/:userid", checkToken , async (req, res) => {
     })
     res.send([Errors, username]);
 });
-
 /* ------------------ SIGNIN ROUTE ---------------------- */
 app.post("/login", (req, res) => {
     let gotUsername = req.body.logusername;
@@ -102,7 +101,7 @@ app.post("/register", (req, res) => {
         }
     })
 });
-/* ------------------ GET TASKS ROUTE ---------------------- */
+/* ------------------ FORM TASKS ROUTE ---------------------- */
 app.post('/tasks', checkToken, (req, res) => {
     const type = req.body.type;
     const level = req.body.level;
@@ -223,7 +222,7 @@ app.post('/task', checkToken, (req, res) => {
         }
     })
 })
-/* ------------------ GET OPTIONS ROUTE ---------------------- */
+/* ------------------ FORM OPTIONS ROUTE ---------------------- */
 app.post("/options", checkToken, (req, res) => {
     const qid = req.body.id;
     console.log('Requested options for task ' + qid);
@@ -284,6 +283,7 @@ app.get('/statistics/:userid', checkToken, async (req, res) => {
     }
     res.send(UserTasks)
 })
+/* ------------------ GET TOTAL ROUTE ---------------------- */
 app.get('/total', async (req, res) => {
     let TotalTasks = [];
     for (let i = 1; i < 4; i++) {
