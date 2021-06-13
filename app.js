@@ -19,33 +19,32 @@ app.post("/ratings", checkToken, (req, res) =>  {
     let sql_query = 'SELECT * FROM user WHERE is_admin = 0 ORDER BY rating DESC';
     db.query(sql_query, (err, result) => {
         let Users = []
-        let resolved = []
         if(err) throw err;
         for (let i = 0; i < result.length; i++) {
-            Users.push({id: result[i].user_id, username: result[i].name_surname, email: result[i].email, rating: result[i].rating, resolved: resolved });
+            Users.push({id: result[i].user_id, username: result[i].name_surname, email: result[i].email, rating: result[i].rating, resolved: [] });
         }
         console.log(Users);
         res.send(Users);
     })
 });
-app.post("/stats", (req, res) => {
+/* ------------------ STATS ROUTE ---------------------- */
+app.post("/errors/", checkToken , async (req, res) => {
     let id = req.body.userid;
-    let username = ''
-    let getUnresolved = 'SELECT * FROM `question` WHERE id NOT IN (SELECT questions_id FROM question_passed WHERE user_id = ?) ORDER BY question.level';
-    stats.getNameSurname(id)
+    let username = '';
+    let Errors = [];
+    await stats.getNameSurname(id)
         .then(name => {
-            username = name;
-        })
-    db.query(getUnresolved, [id], (err, result) => {
-        let Errors = [];
-        if (err) throw err;
-        else {
-            for (let i = 0; i < result.length; i++) {
-                Errors.push({value: result[i].value, qid: result[i].id, type: result[i].type, level: result[i].level})
-            }
-        }
-        res.send(Errors);
+            username = name.name_surname;
+        }).catch(err => {
+            console.log(err);
     })
+    await stats.getUnresolved(id)
+        .then(errors => {
+            Errors = errors;
+        }).catch(err => {
+            console.log(err);
+    })
+    res.send([Errors, username]);
 });
 
 /* ------------------ SIGNIN ROUTE ---------------------- */
@@ -125,16 +124,14 @@ app.post('/tasks', checkToken, (req, res) => {
                 res.send(Tasks);
             }
             if (type === 2) {
-                let opts = [];
                 for (let i = 0; i < result.length; i++) {
-                    Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points, options: opts});
+                    Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points, options: []});
                 }
                 res.send(Tasks);
             }
             if (type === 3) {
-                let opts = [];
                 for (let i = 0; i < result.length; i++) {
-                    Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points, options: opts});
+                    Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points, options: []});
                 }
                 res.send(Tasks);
             }
@@ -227,7 +224,7 @@ app.post('/task', checkToken, (req, res) => {
     })
 })
 /* ------------------ GET OPTIONS ROUTE ---------------------- */
-app.post("/options", (req, res) => {
+app.post("/options", checkToken, (req, res) => {
     const qid = req.body.id;
     console.log('Requested options for task ' + qid);
     db.query('SELECT value FROM variant WHERE question_id = ? UNION ALL SELECT value FROM answer WHERE question_id = ? ORDER BY RAND()', [qid, qid], (err, result) => {
@@ -253,40 +250,13 @@ app.post("/rating", checkToken, (req, res) => {
         }
     })
 })
-
-/*app.post('/test2', async (req, res) => {
-    let id = req.body.userid;
-    let corrsum = [];
-    for (let i = 1; i < 4; i++) {
-        await stats.getCorrectByLevel(id, i).then((correctByLevel) => {
-            corrsum.push(correctByLevel);
-        }).catch((err) => {
-            console.log(err);
-        })
-    }
-    res.send(corrsum);
-})
-app.post('/test3', async (req, res) => {
-    let id = req.body.userid;
-    let level = req.body.level;
-    let corrT = [];
-    for (let i = 1; i < 4; i++) {
-        await stats.getCorrectByType(id, level, i).then((correctByType) => {
-            corrT.push(correctByType);
-        }).catch((err) => {
-            console.log(err);
-        })
-    }
-    res.send(corrT);
-})*/
-app.post('/statistics', async (req, res) => {
+app.post('/statistics', checkToken, async (req, res) => {
     let UserTasks = [];
     const id = req.body.userid;
     for (let i = 1; i < 4; i++) {
         await stats.getAllInfo(id, i)
             .then(totalByLevel => {
             UserTasks.push({level: i, total: totalByLevel});
-            console.log(UserTasks);
         }).catch((err) => {
             console.log(err);
         })
@@ -310,14 +280,7 @@ app.post('/statistics', async (req, res) => {
                 })
         }
     }
-    console.log(UserTasks);
     res.send(UserTasks)
-})
-app.post('/name', (req, res) => {
-    const id = req.body.userid;
-    stats.getNameSurname(id).then(name => {
-        res.send(name);
-    })
 })
 function checkToken (req, res, next) {
     const authHeader = req.body.token;

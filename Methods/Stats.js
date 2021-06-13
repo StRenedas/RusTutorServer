@@ -11,19 +11,20 @@ let getTotalQuestions = () => new Promise((resolve, reject) => {
     });
 });
 
-/*let getCorrectByLevel = (userid, level) => new Promise ((resolve, reject) => {
-    let correctByLevel = 0;
-    const getByLevelQuery = 'SELECT COUNT(question.id) AS CORRECT FROM `question` WHERE id IN (SELECT questions_id FROM question_passed WHERE user_id = ?) AND level = ?';
-    db.query(getByLevelQuery, [userid, level], (err, rows) => {
-        if (err) {
-            reject(err);
-        }
+let getUnresolved = (userid) => new Promise((resolve, reject) => {
+    const getUnresolvedQuery = 'SELECT * FROM `question` WHERE id NOT IN (SELECT questions_id FROM question_passed WHERE user_id = ?) ORDER BY question.level';
+    db.query(getUnresolvedQuery, [userid], (err, result) => {
+        let Errors = [];
+        if (err) reject(err);
         else {
-            correctByLevel = rows[0].CORRECT;
-            resolve(correctByLevel.toString());
+            for (let i = 0; i < result.length; i++) {
+                Errors.push({value: result[i].value, qid: result[i].id, type: result[i].type, level: result[i].level})
+            }
+            resolve(Errors)
         }
-    });
-});*/
+    })
+})
+
 let getCorrectByType = (userid, level, type) => new Promise ((resolve, reject) => {
     let correctByType = 0;
     const getByTypeQuery = 'SELECT COUNT(question.id) AS CORRECT FROM `question` WHERE id IN (SELECT questions_id FROM question_passed WHERE user_id = ?) AND level = ? AND type = ?';
@@ -93,5 +94,6 @@ module.exports = {
     getCorrectByType,
     getAllInfo,
     getAllTypes,
-    getNameSurname
+    getNameSurname,
+    getUnresolved
 }
