@@ -342,7 +342,6 @@ app.post('/check', async(req, res) => {
             }).catch(err => console.log(err));
     }
     corrects = corrects.filter(item => item!==null);
-    console.log(corrects);
     for (let i = 0; i < corrects.length; i++) {
         await questions.getPoints(corrects[i])
             .then(pts => {
@@ -350,9 +349,15 @@ app.post('/check', async(req, res) => {
             })
             .catch(err => console.log(err));
     }
-    console.log(rating);
     await questions.updateRating(rating, userId);
-    res.send(200);
+    for (let i = 0; i < corrects.length; i++) {
+        await questions.updatePassed(userId, corrects[i])
+            .then(value => {
+                console.log(value);
+            })
+            .catch(err => console.log(err));
+    }
+    res.sendStatus(200);
 })
 function checkToken (req, res, next) {
     const authHeader = req.headers['authorization'];

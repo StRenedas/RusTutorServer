@@ -75,8 +75,15 @@ let updateRating = (newpts, userid) => new Promise((resolve, reject) => {
         }
     })
 })
-let getRating = (userid) => new Promise((resolve, reject) => {
-
+let updatePassed = (userid, correct) => new Promise((resolve, reject) => {
+    let msg = 'success'
+    const updatePassedQuery = 'INSERT INTO question_passed (user_id, questions_id) VALUES (?, ?)'
+    db.query(updatePassedQuery, [userid, correct], (err, result) => {
+        if (err) reject(err);
+        else {
+            resolve(msg);
+        }
+    });
 })
 module.exports = {
     getQuestions,
@@ -84,4 +91,5 @@ module.exports = {
     checkAnswers,
     getPoints,
     updateRating,
+    updatePassed,
 }
