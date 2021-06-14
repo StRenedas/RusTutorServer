@@ -167,22 +167,6 @@ app.post('/task', checkToken, (req, res) => {
         }
     })
 })
-/* ------------------ FORM OPTIONS ROUTE ---------------------- */
-app.post("/options", checkToken, (req, res) => {
-    const qid = req.body.id;
-    console.log('Requested options for task ' + qid);
-    db.query('SELECT value FROM variant WHERE question_id = ? UNION ALL SELECT value FROM answer WHERE question_id = ? ORDER BY RAND()', [qid, qid], (err, result) => {
-       if (err) console.log(err);
-       else {
-           let opt = []
-           for (let i = 0; i < result.length; i++) {
-               opt.push(result[i].value);
-           }
-           console.log(opt);
-           res.send(opt);
-       }
-    })
-})
 /* ------------------ GET RATING ROUTE ---------------------- */
 app.get("/rating/:userid", checkToken, (req, res) => {
     const userId = req.params.userid;
@@ -260,7 +244,7 @@ app.get('/total', checkToken , async (req, res) => {
     }
     res.send(TotalTasks);
 })
-/* ------------------ FORM TASKS ROUTE ---------------------- */
+/* ------------------ FORM QUESTIONS ROUTE ---------------------- */
 app.post('/questions', checkToken , async (req, res) => {
     const type = req.body.type;
     const level = req.body.level;

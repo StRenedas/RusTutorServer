@@ -1,7 +1,7 @@
 const db = require('../db');
 let getQuestions = (level, type) => new Promise ((resolve, reject) => {
     const queryParams = [level, type];
-    const getTasksQuery = 'SELECT * FROM question WHERE level = ? AND type = ? ORDER BY RAND() LIMIT 9';
+    const getTasksQuery = 'SELECT * FROM question WHERE level = ? AND type = ? ORDER BY RAND() LIMIT 10';
     let Tasks = [];
     db.query(getTasksQuery, queryParams, (err, result) => {
         if(err) {
