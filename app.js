@@ -6,7 +6,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require("./db");
 const config = require("./config");
-const stats = require('./Methods/Stats')
+const stats = require('./Methods/Stats');
+const questions = require('./Methods/Questions');
 const app = express();
 app.use(cors());
 app.use(bodyParser());
@@ -138,13 +139,10 @@ app.post('/tasks', checkToken, (req, res) => {
     })
 })
 /* ------------------ CHECK ANSWERS ROUTE ---------------------- */
-app.post('/process', checkToken, (req, res) => {
+app.post('/process', checkToken, async (req, res) => {
     let userId = req.body.userid;
     let answers = req.body.answers;
     let rating = req.body.rating;
-    if (answers.length === 0) {
-        res.send('No answers provided!')
-    }
     const checkAnswerQuery = 'SELECT question_id, value from answer WHERE question_id = ?';
     const getPointsQuery = 'SELECT points from question WHERE id = ?';
     const updateRatingQuery = 'UPDATE user SET rating = ? WHERE user_id = ?'
@@ -156,10 +154,11 @@ app.post('/process', checkToken, (req, res) => {
             }
             else {
                 if (result[0].value.toLowerCase() === answers[i].ans.toLowerCase()) {
-                    console.log('Question ' + answers[i].qid + ' is answered correctly!')
-                    db.query(getPointsQuery, result[0].question_id, (err, result) => {
-                        console.log(rating);
-                        rating+=result[0].points;
+/*                    console.log('Question ' + answers[i].qid + ' is answered correct!');
+                    console.log(result);*/
+                    db.query(getPointsQuery, result[0].question_id, (err, results) => {
+                        console.log(results);
+                        rating+=results[0].points;
                         const userToUpdate = [rating, userId];
                         db.query(updateRatingQuery, userToUpdate, (err) => {
                             if (err) {
@@ -172,9 +171,8 @@ app.post('/process', checkToken, (req, res) => {
                     })
                 }
                 else if (result[0].value !== answers[i].ans){
-                    console.log('Question ' + answers[i].qid + ' is answered wrong!');
+/*                    console.log('Question ' + answers[i].qid + ' is answered wrong!');*/
                 }
-
             }
         })
     }
@@ -314,6 +312,47 @@ app.get('/total', checkToken , async (req, res) => {
         }
     }
     res.send(TotalTasks);
+})
+
+app.post('/questions', async (req, res) => {
+    const type = req.body.type;
+    const level = req.body.level;
+    let newTasks = [];
+    await questions.getQuestions(level, type)
+        .then(Tasks => {
+            newTasks = Tasks;
+        }).catch(err => {console.log(err)});
+    for (let i = 0; i < newTasks.length; i++) {
+        await questions.getOptions(newTasks[i].id)
+            .then(opts => {
+                newTasks[i].options = opts;
+            }).catch(err => console.log(err));
+    }
+    res.send(newTasks);
+})
+app.post('/check', async(req, res) => {
+    let userId = req.body.userid;
+    let answers = req.body.answers;
+    let rating = req.body.rating;
+    let corrects = [];
+    for (let i = 0; i < answers.length; i++) {
+        await questions.checkAnswers(answers[i])
+            .then(cid => {
+                corrects.push(cid)
+            }).catch(err => console.log(err));
+    }
+    corrects = corrects.filter(item => item!==null);
+    console.log(corrects);
+    for (let i = 0; i < corrects.length; i++) {
+        await questions.getPoints(corrects[i])
+            .then(pts => {
+                rating += pts
+            })
+            .catch(err => console.log(err));
+    }
+    console.log(rating);
+    await questions.updateRating(rating, userId);
+    res.send(200);
 })
 function checkToken (req, res, next) {
     const authHeader = req.headers['authorization'];
