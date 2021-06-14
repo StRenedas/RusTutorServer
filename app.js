@@ -130,7 +130,7 @@ app.post('/check', checkToken , async (req, res) => {
             })
             .catch(err => console.log(err));
     }
-    res.sendStatus(200);
+    res.send(corrects);
 })
 /* ------------------ ADD TASKS ROUTE ---------------------- */
 app.post('/task', checkToken, (req, res) => {
@@ -262,6 +262,18 @@ app.post('/questions', checkToken , async (req, res) => {
     res.send(newTasks);
 })
 
+app.post('/results', async (req, res) => {
+    const corrs = req.body.corrs;
+    let corrects = []
+    for (let i = 0; i < corrs.length; i++) {
+        await questions.getCorrects(corrs[i])
+            .then(obj => {
+                corrects.push(obj)
+            })
+            .catch(err => console.log(err))
+    }
+    res.send(corrects);
+})
 function checkToken (req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];

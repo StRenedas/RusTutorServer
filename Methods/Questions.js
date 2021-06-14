@@ -85,6 +85,18 @@ let updatePassed = (userid, correct) => new Promise((resolve, reject) => {
         }
     });
 })
+let getCorrects = (qid) => new Promise ((resolve, reject) => {
+    const getCorrectQuery = 'SELECT value from question WHERE id = ?';
+    db.query(getCorrectQuery, [qid], (err, result) => {
+        if(err) {
+            reject(err);
+        }
+        else {
+            console.log(result[0].value)
+            resolve({corrid: qid, value: result[0].value});
+        }
+    })
+})
 module.exports = {
     getQuestions,
     getOptions,
@@ -92,4 +104,5 @@ module.exports = {
     getPoints,
     updateRating,
     updatePassed,
+    getCorrects
 }
