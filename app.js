@@ -102,88 +102,35 @@ app.post("/register", (req, res) => {
         }
     })
 });
-/* ------------------ FORM TASKS ROUTE ---------------------- */
-app.post('/tasks', checkToken, (req, res) => {
-    const type = req.body.type;
-    const level = req.body.level;
-    const user_id = req.body.userid;
-    console.log('User ' + user_id + 'tries to get level ' + level + 'and type ' + type + 'tasks')
-    const queryParams = [level, type];
-    const getTasksQuery = 'SELECT * FROM question WHERE level = ? AND type = ? ORDER BY RAND() LIMIT 9';
-    db.query(getTasksQuery, queryParams, (err, result) => {
-        if(err) {
-            res.send('Query error, please try again');
-        }
-        else {
-            let Tasks = [];
-            if (type === 1) {
-                for (let i = 0; i < result.length; i++) {
-                    Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points});
-                    console.log(Tasks);
-                }
-                res.send(Tasks);
-            }
-            if (type === 2) {
-                for (let i = 0; i < result.length; i++) {
-                    Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points, options: []});
-                }
-                res.send(Tasks);
-            }
-            if (type === 3) {
-                for (let i = 0; i < result.length; i++) {
-                    Tasks.push({id: result[i].id, value: result[i].value, points: result[i].points, options: []});
-                }
-                res.send(Tasks);
-            }
-        }
-    })
-})
 /* ------------------ CHECK ANSWERS ROUTE ---------------------- */
-app.post('/process', checkToken, async (req, res) => {
+app.post('/check', checkToken , async (req, res) => {
     let userId = req.body.userid;
     let answers = req.body.answers;
     let rating = req.body.rating;
-    const checkAnswerQuery = 'SELECT question_id, value from answer WHERE question_id = ?';
-    const getPointsQuery = 'SELECT points from question WHERE id = ?';
-    const updateRatingQuery = 'UPDATE user SET rating = ? WHERE user_id = ?'
-    const updatePassedQuery = 'INSERT INTO question_passed (user_id, questions_id) VALUES (?, ?)'
-    for(let i = 0; i < answers.length; i++) {
-        db.query(checkAnswerQuery, answers[i].qid, (err, result) => {
-            if(err) {
-                res.send('no such question')
-            }
-            else {
-                if (result[0].value.toLowerCase() === answers[i].ans.toLowerCase()) {
-/*                    console.log('Question ' + answers[i].qid + ' is answered correct!');
-                    console.log(result);*/
-                    db.query(getPointsQuery, result[0].question_id, (err, results) => {
-                        console.log(results);
-                        rating+=results[0].points;
-                        const userToUpdate = [rating, userId];
-                        db.query(updateRatingQuery, userToUpdate, (err) => {
-                            if (err) {
-                                console.log(err);
-                            }
-                            else {
-                                db.query(updatePassedQuery, [userId, answers[i].qid])
-                            }
-                        })
-                    })
-                }
-                else if (result[0].value !== answers[i].ans){
-/*                    console.log('Question ' + answers[i].qid + ' is answered wrong!');*/
-                }
-            }
-        })
+    let corrects = [];
+    for (let i = 0; i < answers.length; i++) {
+        await questions.checkAnswers(answers[i])
+            .then(cid => {
+                corrects.push(cid)
+            }).catch(err => console.log(err));
     }
-    db.query('SELECT rating FROM user WHERE user_id = ?', userId, (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log(result[0].rating);
-            res.send({ updatedRating: result[0].rating});
-        }
-    })
+    corrects = corrects.filter(item => item!==null);
+    for (let i = 0; i < corrects.length; i++) {
+        await questions.getPoints(corrects[i])
+            .then(pts => {
+                rating += pts
+            })
+            .catch(err => console.log(err));
+    }
+    await questions.updateRating(rating, userId);
+    for (let i = 0; i < corrects.length; i++) {
+        await questions.updatePassed(userId, corrects[i])
+            .then(value => {
+                console.log(value);
+            })
+            .catch(err => console.log(err));
+    }
+    res.sendStatus(200);
 })
 /* ------------------ ADD TASKS ROUTE ---------------------- */
 app.post('/task', checkToken, (req, res) => {
@@ -313,8 +260,8 @@ app.get('/total', checkToken , async (req, res) => {
     }
     res.send(TotalTasks);
 })
-
-app.post('/questions', async (req, res) => {
+/* ------------------ FORM TASKS ROUTE ---------------------- */
+app.post('/questions', checkToken , async (req, res) => {
     const type = req.body.type;
     const level = req.body.level;
     let newTasks = [];
@@ -330,35 +277,7 @@ app.post('/questions', async (req, res) => {
     }
     res.send(newTasks);
 })
-app.post('/check', async(req, res) => {
-    let userId = req.body.userid;
-    let answers = req.body.answers;
-    let rating = req.body.rating;
-    let corrects = [];
-    for (let i = 0; i < answers.length; i++) {
-        await questions.checkAnswers(answers[i])
-            .then(cid => {
-                corrects.push(cid)
-            }).catch(err => console.log(err));
-    }
-    corrects = corrects.filter(item => item!==null);
-    for (let i = 0; i < corrects.length; i++) {
-        await questions.getPoints(corrects[i])
-            .then(pts => {
-                rating += pts
-            })
-            .catch(err => console.log(err));
-    }
-    await questions.updateRating(rating, userId);
-    for (let i = 0; i < corrects.length; i++) {
-        await questions.updatePassed(userId, corrects[i])
-            .then(value => {
-                console.log(value);
-            })
-            .catch(err => console.log(err));
-    }
-    res.sendStatus(200);
-})
+
 function checkToken (req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
