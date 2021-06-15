@@ -6,7 +6,6 @@ module.exports = mysql.createPool ({
     user: config.DBUSER,
     password: config.DBPASSWORD,
     database: config.DBNAME,
-    jwt: config.JWTSECRET,
-    connectionLimit: 100,
+    connectionLimit: 10,
 });
 

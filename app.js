@@ -185,7 +185,7 @@ app.get("/rating/:userid", checkToken, (req, res) => {
     })
 })
 /* ------------------ GET STATISTICS ROUTE ---------------------- */
-app.get('/statistics/:userid', checkToken,  async (req, res) => {
+app.get('/statistics/:userid', checkToken, async (req, res) => {
     let UserTasks = [];
     const id = req.params.userid;
     for (let i = 1; i < 4; i++) {
