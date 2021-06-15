@@ -281,7 +281,7 @@ app.post('/results', async (req, res) => {
 })
 function checkToken (req, res, next) {
     const authHeader = req.headers['authorization'];
-    const role = req.headers['user-role'];
+    const role = req.headers['user-role'].toString();
     const token = authHeader && authHeader.split(' ')[1];
     if (token == null) return res.sendStatus(401);
     jwt.verify(token, config.JWTSECRET, (err) => {
