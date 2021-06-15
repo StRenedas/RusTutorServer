@@ -29,7 +29,7 @@ app.get("/users", checkToken, (req, res) =>  {
     })
 });
 /* ------------------ STATS ROUTE ---------------------- */
-app.get("/errors/:userid", checkToken, checkStudent , async (req, res) => {
+app.get("/errors/:userid", checkToken , async (req, res) => {
     let id = req.params.userid;
     let username = '';
     let Errors = [];
@@ -103,7 +103,7 @@ app.post("/register", (req, res) => {
     })
 });
 /* ------------------ CHECK ANSWERS ROUTE ---------------------- */
-app.post('/check', checkToken , checkStudent, async (req, res) => {
+app.post('/check', checkToken , async (req, res) => {
     let userId = req.body.userid;
     let answers = req.body.answers;
     let rating = 0;
@@ -138,7 +138,7 @@ app.post('/check', checkToken , checkStudent, async (req, res) => {
     res.send(corrects);
 })
 /* ------------------ ADD TASKS ROUTE ---------------------- */
-app.post('/task', checkToken, checkStudent, (req, res) => {
+app.post('/task', checkToken, (req, res) => {
     const level = req.body.level;
     const value = req.body.text;
     const answer = req.body.answer.toLowerCase();
@@ -250,7 +250,7 @@ app.get('/total', checkToken ,  async (req, res) => {
     res.send(TotalTasks);
 })
 /* ------------------ FORM QUESTIONS ROUTE ---------------------- */
-app.post('/questions', checkToken , checkAdmin , async (req, res) => {
+app.post('/questions', checkToken, async (req, res) => {
     const type = req.body.type;
     const level = req.body.level;
     let newTasks = [];
@@ -281,15 +281,26 @@ app.post('/results', async (req, res) => {
 })
 function checkToken (req, res, next) {
     const authHeader = req.headers['authorization'];
+    const role = req.headers['user-role'];
     const token = authHeader && authHeader.split(' ')[1];
-    res.locals.token = token;
     if (token == null) return res.sendStatus(401);
     jwt.verify(token, config.JWTSECRET, (err) => {
         if (err) return res.sendStatus(403);
-        else next();
+        else {
+            const decoded = jwt.decode(token);
+            const tokenRole = decoded.isAdmin.toString();
+            if (role !== tokenRole) {
+                console.log(role, tokenRole);
+                return res.sendStatus(403);
+            }
+            else {
+                next();
+            }
+            /*next();*/
+        }
      })
-};
-function checkAdmin (req, res, next) {
+}
+/*function checkAdmin (req, res, next) {
     const role = req.body.role;
     const token = res.locals.token;
     const decoded = jwt.decode(token);
@@ -312,7 +323,7 @@ function checkStudent(req, res, next) {
     else {
         next();
     }
-}
+}*/
 app.listen(PORT, ()=> {
     console.log(`Server is running on port ${PORT}.`);
 });
