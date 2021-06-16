@@ -18,7 +18,7 @@ app.get("/", (req, res) => {
 /* ------------------ RATINGS ROUTE ---------------------- */
 app.get("/users", checkToken, (req, res) =>  {
     let sql_query = 'SELECT * FROM user WHERE is_admin = 0 ORDER BY rating DESC';
-    db.query(sql_query, (err, result) => {
+    db.execute(sql_query, (err, result) => {
         let Users = []
         if(err) throw err;
         for (let i = 0; i < result.length; i++) {
@@ -53,12 +53,12 @@ app.post("/login", (req, res) => {
     let gotPassword = req.body.logpassword;
     let sql_query = 'SELECT `user_id`, `username`, `rating`, `is_admin` FROM `user` WHERE username = ?';
     let checkPasswordQuery = 'SELECT password FROM user WHERE username = ?'
-    db.query(sql_query, gotUsername, (err, rows) => {
+    db.execute(sql_query, gotUsername, (err, rows) => {
         if(rows.length>0 && rows[0].username === gotUsername) {
             let gotUserid = rows[0].user_id;
             let isAdmin = rows[0].is_admin;
             let gotUserRating = rows[0].rating;
-            db.query(checkPasswordQuery, gotUsername, (err, result) => {
+            db.execute(checkPasswordQuery, gotUsername, (err, result) => {
                 if(err) {
                     res.send(err);
                 }
@@ -87,14 +87,14 @@ app.post("/register", (req, res) => {
     let password = bcrypt.hashSync(req.body.password, salt);
     let user = [username, password, name];
     let sql_getallusers = "SELECT username from user WHERE username = ?";
-    db.query(sql_getallusers, username, (err, rows) => {
+    db.execute(sql_getallusers, username, (err, rows) => {
         if(rows.length>0 && rows[0].username === username) {
             console.log('username found');
             res.send({auth_error: 'Please choose another username!'})
         }
         else {
             let sql_template = 'INSERT INTO user (username, password, name_surname) VALUES (?,?,?)';
-            db.query(sql_template, user, (err) => {
+            db.execute(sql_template, user, (err) => {
             if(err) throw err;
             console.log('registered');
             res.send('Registration successful!');
@@ -145,18 +145,18 @@ app.post('/task', checkToken, (req, res) => {
     const type = req.body.type;
     const points = req.body.points;
     let addTaskQuery = "INSERT INTO question (type, level, value, points) VALUES (?,?,?,?)";
-    db.query(addTaskQuery, [type, level, value, points], (err) => {
+    db.execute(addTaskQuery, [type, level, value, points], (err) => {
         if (err) {
             console.log(err);
         } else {
-            db.query("SELECT MAX(id) AS lastQuestionId FROM question", (err, result) => {
+            db.execute("SELECT MAX(id) AS lastQuestionId FROM question", (err, result) => {
                 const number = result[0].lastQuestionId;
                 const answerToInsert = [number, answer]
-                db.query("INSERT INTO answer (question_id, value) VALUES (?,?)", answerToInsert, (err) => {
+                db.execute("INSERT INTO answer (question_id, value) VALUES (?,?)", answerToInsert, (err) => {
                     if (err) console.log(err);
                     if (req.body.options) {
                         for (let i = 0; i < req.body.options.length; i++) {
-                            db.query('INSERT INTO variant (question_id, value) VALUES (?,?)', [number, req.body.options[i]], (err) => {
+                            db.execute('INSERT INTO variant (question_id, value) VALUES (?,?)', [number, req.body.options[i]], (err) => {
                                 if (err) console.log(err);
                                 else console.log('Option inserted!');
                             })
@@ -175,7 +175,7 @@ app.post('/task', checkToken, (req, res) => {
 /* ------------------ GET RATING ROUTE ---------------------- */
 app.get("/rating/:userid", checkToken, (req, res) => {
     const userId = req.params.userid;
-    db.query('SELECT rating FROM user WHERE user_id = ?', userId, (err, result) => {
+    db.execute('SELECT rating FROM user WHERE user_id = ?', userId, (err, result) => {
         if (err) {
             console.log(err);
         } else {

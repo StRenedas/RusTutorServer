@@ -3,7 +3,7 @@ let getQuestions = (level, type) => new Promise ((resolve, reject) => {
     const queryParams = [level, type];
     const getTasksQuery = 'SELECT * FROM question WHERE level = ? AND type = ? ORDER BY RAND() LIMIT 10';
     let Tasks = [];
-    db.query(getTasksQuery, queryParams, (err, result) => {
+    db.execute(getTasksQuery, queryParams, (err, result) => {
         if(err) {
             reject(err);
         }
@@ -32,7 +32,7 @@ let getQuestions = (level, type) => new Promise ((resolve, reject) => {
 });
 let getOptions = (qid) => new Promise ((resolve, reject) => {
     console.log('Requested options for task ' + qid);
-    db.query('SELECT value FROM variant WHERE question_id = ? UNION ALL SELECT value FROM answer WHERE question_id = ? ORDER BY RAND()', [qid, qid], (err, result) => {
+    db.execute('SELECT value FROM variant WHERE question_id = ? UNION ALL SELECT value FROM answer WHERE question_id = ? ORDER BY RAND()', [qid, qid], (err, result) => {
         if (err) reject(err);
         else {
             let opt = []
@@ -47,7 +47,7 @@ let getOptions = (qid) => new Promise ((resolve, reject) => {
 let checkAnswers = (answer) => new Promise ((resolve, reject) => {
     console.log(answer);
     const checkAnswerQuery = 'SELECT question_id, value from answer WHERE question_id = ?';
-    db.query(checkAnswerQuery, answer.qid, (err, result) => {
+    db.execute(checkAnswerQuery, answer.qid, (err, result) => {
         if(err) reject(err);
         else {
             if (result[0].value.toLowerCase() === answer.ans.toLowerCase()) {
@@ -59,7 +59,7 @@ let checkAnswers = (answer) => new Promise ((resolve, reject) => {
 })
 let getPoints = (qid) => new Promise ((resolve, reject) => {
     const getPointsQuery = 'SELECT points from question WHERE id = ?';
-    db.query(getPointsQuery, qid, (err, result) => {
+    db.execute(getPointsQuery, qid, (err, result) => {
         if(err) reject(err);
         else {
             resolve(result[0].points);
@@ -68,7 +68,7 @@ let getPoints = (qid) => new Promise ((resolve, reject) => {
 });
 let updateRating = (newpts, userid) => new Promise((resolve, reject) => {
     const updateRatingQuery = 'UPDATE user SET rating = ? WHERE user_id = ?';
-    db.query(updateRatingQuery, [newpts, userid], (err, result) => {
+    db.execute(updateRatingQuery, [newpts, userid], (err, result) => {
         if(err) reject(err);
         else {
             resolve('Rating updated');
@@ -78,7 +78,7 @@ let updateRating = (newpts, userid) => new Promise((resolve, reject) => {
 let updatePassed = (userid, correct) => new Promise((resolve, reject) => {
     let msg = 'success'
     const updatePassedQuery = 'INSERT INTO question_passed (user_id, questions_id) VALUES (?, ?)'
-    db.query(updatePassedQuery, [userid, correct], (err, result) => {
+    db.execute(updatePassedQuery, [userid, correct], (err, result) => {
         if (err) reject(err);
         else {
             resolve(msg);
@@ -87,7 +87,7 @@ let updatePassed = (userid, correct) => new Promise((resolve, reject) => {
 })
 let getCorrects = (qid) => new Promise ((resolve, reject) => {
     const getCorrectQuery = 'SELECT value from question WHERE id = ?';
-    db.query(getCorrectQuery, [qid], (err, result) => {
+    db.execute(getCorrectQuery, [qid], (err, result) => {
         if(err) {
             reject(err);
         }
