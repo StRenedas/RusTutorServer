@@ -2,7 +2,7 @@ const db = require('../db.js');
 let getTotalQuestions = (level) => new Promise((resolve, reject) => {
     let totalByLevel = 0;
     const getQuestionSum = "SELECT COUNT(id) AS TOTAL FROM question WHERE level = ?";
-    db.execute(getQuestionSum, [level], (err, rows) => {
+    db.query(getQuestionSum, [level], (err, rows) => {
         if (err) {
             reject(err);
         }
@@ -15,7 +15,7 @@ let getTotalQuestions = (level) => new Promise((resolve, reject) => {
 let getTotalTypes = (level, type) => new Promise((resolve, reject) => {
     let totalByType = 0;
     const getTypes = 'SELECT COUNT(question.id) AS TOTAL FROM `question` WHERE level = ? AND type = ?';
-    db.execute(getTypes, [level, type], (err, rows) => {
+    db.query(getTypes, [level, type], (err, rows) => {
         if (err) {
             reject(err);
         }
@@ -28,7 +28,7 @@ let getTotalTypes = (level, type) => new Promise((resolve, reject) => {
 })
 let getUnresolved = (userid) => new Promise((resolve, reject) => {
     const getUnresolvedQuery = 'SELECT * FROM `question` WHERE id NOT IN (SELECT questions_id FROM question_passed WHERE user_id = ?) ORDER BY question.level';
-    db.execute(getUnresolvedQuery, [userid], (err, result) => {
+    db.query(getUnresolvedQuery, [userid], (err, result) => {
         let Errors = [];
         if (err) reject(err);
         else {
@@ -42,7 +42,7 @@ let getUnresolved = (userid) => new Promise((resolve, reject) => {
 let getAllInfo = (userid, level) => new Promise((resolve, reject) => {
     let totalByLevel = 0;
     const getLevels = 'SELECT COUNT(question.id) AS CORRECT FROM `question` WHERE id IN (SELECT questions_id FROM question_passed WHERE user_id = ?) AND level = ?'
-    db.execute(getLevels, [userid, level], (err, rows) => {
+    db.query(getLevels, [userid, level], (err, rows) => {
         if (err) {
             reject(err);
         }
@@ -55,7 +55,7 @@ let getAllInfo = (userid, level) => new Promise((resolve, reject) => {
 let getAllTypes = (userid, level, type) => new Promise((resolve, reject) => {
     let totalByType = 0;
     const getTypes = 'SELECT COUNT(question.id) AS CORRECT FROM `question` WHERE id IN (SELECT questions_id FROM question_passed WHERE user_id = ?) AND level = ? AND type = ?';
-    db.execute(getTypes, [userid, level, type], (err, rows) => {
+    db.query(getTypes, [userid, level, type], (err, rows) => {
         if (err) {
             reject(err);
         }
@@ -69,7 +69,7 @@ let getAllTypes = (userid, level, type) => new Promise((resolve, reject) => {
 })
 let getNameSurname = (userid) => new Promise((resolve, reject) => {
     const getNicknameQuery = 'SELECT name_surname FROM user WHERE user_id = ?';
-    db.execute(getNicknameQuery, [userid], (err, result) => {
+    db.query(getNicknameQuery, [userid], (err, result) => {
         if (err) reject(err);
         else resolve(result[0]);
     })
@@ -77,7 +77,7 @@ let getNameSurname = (userid) => new Promise((resolve, reject) => {
 let getRating = (userid) => new Promise ((resolve, reject) => {
     let currRating = 0;
     const getRatingByIdQuery = 'SELECT rating FROM user WHERE user_id = ?';
-    db.execute(getRatingByIdQuery, [userid], (err, result) => {
+    db.query(getRatingByIdQuery, [userid], (err, result) => {
         if(err) reject(err);
         else {
             currRating = result[0].rating.toString();
